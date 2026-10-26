@@ -1,0 +1,13 @@
+{
+  "name": "measureable-hedis-automation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright automation for setting up a HEDIS measure dashboard, program and quality measures in MeasureAble (external-qa).",
+  "scripts": {
+    "setup": "node create-hedis-dashboard.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}
