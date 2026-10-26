@@ -24,7 +24,17 @@ CQL-to-DRL conversion pipeline (source intake, baseline, conversion, approval, A
 
 Run **Chat: Install Plugin From Source** in VS Code with this repo's URL, then select `drlFlowOrchestrator` and give it a ticket ID or work-item URL.
 
-Mutable state and artifacts are written to `${PLUGIN_DATA}/drl-pipeline/`, not the install folder.
+Mutable state and artifacts are written to `${PLUGIN_DATA}/drl-pipeline/`, not the install folder (on Windows, under `%USERPROFILE%\.copilot\plugin-data\`).
+
+## Reviewing generated files
+
+Before asking for approval, and again after the PR is submitted, `drlFlowOrchestrator` calls the `export_artifacts` tool. It copies the ticket's files to `drl-output/<ticket-id>/` under the MCP server's working directory (normally the open workspace) and reports the exact path. Review these before approving:
+
+- `patches/*-drl.patch`: the DRL changes
+- `mapping.md`, `plan.md`
+- `drls/generated/`: the full generated DRLs
+
+The export is a copy; the agents keep working from the plugin data folder.
 
 ## Updating from source
 
