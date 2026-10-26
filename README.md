@@ -1,50 +1,36 @@
-# PR Review Agent Plugin
+# drl-pipeline plugin
 
-Standalone package for an evidence-first GitHub pull request reviewer that validates changes against linked Azure DevOps work items.
+CQL-to-DRL conversion pipeline (source intake, baseline, conversion, approval, API JSON, tests, GitHub PR) packaged as an Agent Plugin. Built from `measureable_content_agents` (`main`).
 
-## Package Contents
+## Contents
 
-- `plugin.json` defines identity, permissions, integrations, and compatibility.
-- `agent.md` contains the review workflow and safety boundaries.
-- `integration-contract.md` defines the host capabilities required by the agent.
-- `scripts/package.ps1` validates and builds the distributable artifact.
+| Path | Purpose |
+|---|---|
+| `com.github.copilot/agents/` | 10 `drl*` agents; start with `drlFlowOrchestrator` |
+| `skills/` | `cqm-drl`, `hedis-drl`, `mips-drl`, `drl-review-rules` |
+| `mcp.json` | `local-python` MCP server over stdio (no Docker or manual start) |
+| `runtime/` | Read-only scripts, templates, docs and orchestration config |
+| `overlay/` | Plugin-specific versions of source files; applied over the synced copy |
+| `scripts/sync-from-source.ps1` | Rebuilds the plugin from a `measureable_content_agents` checkout |
 
-## Build
+## Requirements
 
-From this repository:
+- Python with `uv` (`python -m uv --version`).
+- Environment variables in the shell that launches VS Code: `ADO_PAT`, `GITHUB_TOKEN`, `API_AUTH_BASIC_TOKEN`; `LIBRARIAN_API_KEY` and `LIBRARIAN_API_SECRET` if used.
+- Recommended: a local `rules-engine` checkout, with `RULES_ENGINE_REPO_PATH` pointing to it.
+- The `ado-content` and `github-content` MCP servers are not bundled; configure them yourself.
+
+## Install
+
+Run **Chat: Install Plugin From Source** in VS Code with this repo's URL, then select `drlFlowOrchestrator` and give it a ticket ID or work-item URL.
+
+Mutable state and artifacts are written to `${PLUGIN_DATA}/drl-pipeline/`, not the install folder.
+
+## Updating from source
 
 ```powershell
-.\scripts\package.ps1
+git clone https://healthcatalyst@dev.azure.com/healthcatalyst/MeasureAble%202.0/_git/measureable_content_agents
+.\scripts\sync-from-source.ps1 -SourcePath .\measureable_content_agents
 ```
 
-The build creates:
-
-```text
-dist/com.ablehealth.pr-review-agent-1.0.0.agentplugin
-dist/com.ablehealth.pr-review-agent-1.0.0.agentplugin.sha256
-```
-
-The `.agentplugin` file is a ZIP archive with a custom extension. The company marketplace can store this file and return it to a compatible plugin host.
-
-## Authentication
-
-The package never contains credentials. The plugin host must obtain secrets from its credential store and expose read-only connectors using:
-
-- `GITHUB_TOKEN` with access to the repositories being reviewed.
-- `AZURE_DEVOPS_PAT` with Work Items read access.
-
-Do not put either value in `plugin.json`, source control, marketplace metadata, logs, or chat output.
-
-## Host Responsibilities
-
-The company plugin host must:
-
-1. Validate the package checksum and publisher signature before installation.
-2. Reject archive entries that escape the installation directory.
-3. Read and validate `plugin.json` against the company plugin schema.
-4. Show the requested permissions to the user before installation.
-5. Map the declared integration capabilities to authenticated GitHub and Azure DevOps connectors.
-6. Load `agent.md` as the agent's controlling instructions.
-7. Keep the connectors read-only unless a future plugin version explicitly requests additional permissions.
-
-Until the company host implements this contract, the package is buildable and distributable but cannot execute independently.
+A warning means a source file that has an overlay version changed. Merge the change into `overlay/`, then run again with `-UpdateBaseline`. Bump `version` in `plugin.json` before publishing so users receive the update.

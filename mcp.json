@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "local-python": {
+      "type": "stdio",
+      "command": "py",
+      "args": [
+        "-3",
+        "-m",
+        "uv",
+        "run",
+        "--quiet",
+        "--with-requirements",
+        "${PLUGIN_ROOT}/runtime/agents/Drl Pipeline/config/mcp/requirements-local-mcp.txt",
+        "${PLUGIN_ROOT}/runtime/agents/Drl Pipeline/scripts/local_mcp_server.py",
+        "--stdio"
+      ],
+      "env": {
+        "DRL_DATA_DIR": "${PLUGIN_DATA}/drl-pipeline",
+        "ORCHESTRATION_CONFIG_PATH": "${PLUGIN_ROOT}/runtime/orchestration/config.json"
+      }
+    }
+  }
+}

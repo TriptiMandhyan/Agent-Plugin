@@ -1,0 +1,26 @@
+{
+  "canonicalStatuses": [
+    "intake-start",
+    "extraction-complete",
+    "baseline-template-ready",
+    "awaiting-approval",
+    "conversion-ready",
+    "conversion-complete",
+    "api-artifact-ready",
+    "test-artifact-ready",
+    "pr-ready",
+    "pr-submitted"
+  ],
+  "statusDescriptions": {
+    "intake-start": "Initial state - ticket information being extracted",
+    "extraction-complete": "CQL files extracted and analyzed",
+    "baseline-template-ready": "Baseline DRL template fetched and prepared",
+    "awaiting-approval": "Deprecated - use conversion-complete instead",
+    "conversion-ready": "Ready to begin CQL-to-DRL conversion",
+    "conversion-complete": "DRL generated - awaiting explicit approval",
+    "api-artifact-ready": "Measure JSON artifact generated from API",
+    "test-artifact-ready": "Java test file generated",
+    "pr-ready": "Approval recorded - ready for PR creation",
+    "pr-submitted": "Pull request created and submitted"
+  }
+}

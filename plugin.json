@@ -1,50 +1,7 @@
 {
-  "schemaVersion": "1.0",
-  "id": "com.ablehealth.pr-review-agent",
-  "name": "PR Review Agent",
-  "version": "1.0.0",
-  "description": "Reviews GitHub pull requests against linked Azure DevOps requirements with evidence-first findings.",
-  "author": "AbleHealth",
-  "entrypoint": "agent.md",
-  "permissions": [
-    "github.pullRequests.read",
-    "github.repositoryContents.read",
-    "github.checks.read",
-    "azureDevOps.workItems.read"
-  ],
-  "integrations": [
-    {
-      "id": "github",
-      "required": true,
-      "capabilities": [
-        "pullRequest.read",
-        "pullRequest.files.read",
-        "pullRequest.diff.read",
-        "pullRequest.comments.read",
-        "pullRequest.reviews.read",
-        "checks.read",
-        "repository.file.read"
-      ],
-      "authentication": {
-        "type": "token",
-        "environmentVariable": "GITHUB_TOKEN"
-      }
-    },
-    {
-      "id": "azureDevOps",
-      "required": true,
-      "capabilities": [
-        "workItem.read",
-        "workItem.relations.read",
-        "workItem.comments.read"
-      ],
-      "authentication": {
-        "type": "personalAccessToken",
-        "environmentVariable": "AZURE_DEVOPS_PAT"
-      }
-    }
-  ],
-  "compatibility": {
-    "pluginApi": ">=1.0 <2.0"
-  }
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "drl-pipeline",
+  "version": "0.1.0",
+  "description": "CQL-to-DRL conversion pipeline: source intake, baseline, conversion, approval, API JSON, tests, and GitHub PR.",
+  "keywords": ["drl", "cql", "rules-engine", "healthcare", "measures"]
 }

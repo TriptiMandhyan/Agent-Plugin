@@ -1,0 +1,11 @@
+﻿{
+    "com.github.copilot/agents/drl-baseline-builder.agent.md":  "9075A141E4A8687BBC82813FE49D5BD1563C95545A7D5B3873EF255890741F27",
+    "com.github.copilot/agents/drl-converter.agent.md":  "62B7B36D977C840912FB930C72FCDF55EB0F4065147046E7129BB23BDF40F179",
+    "com.github.copilot/agents/drl-flow-orchestrator.agent.md":  "F472827D7C3021C16C47C8B4C9C0F23BDA3E3935F1455F778C668DBC152123FA",
+    "com.github.copilot/agents/drl-learning.agent.md":  "143FFEA00078EB439474F1EA4BF698CBC1F661C138A8742AAD74A58535B59BDA",
+    "com.github.copilot/agents/drl-source-intake.agent.md":  "F79D81DE2BE9C843AB890519DD39C1FBA649EFF77B279E92F2006F28CBD03693",
+    "com.github.copilot/agents/drl-ticket-reset.agent.md":  "02D907A08207BE9F43825DD574DAA9524D8BA70EC58F72FFF11BFCE423302FB7",
+    "runtime/agents/Drl Pipeline/scripts/learning_engine.py":  "69CD840BBAC0F27E48A6D8DB944026DB12286B0A0999451BED966F303A506099",
+    "runtime/agents/Drl Pipeline/scripts/local_mcp_server.py":  "A2305C030CD097ADB8E1550985DDF1E93A39F3DEDA34FB7EC7BCA75069DE2B34",
+    "runtime/agents/Drl Pipeline/scripts/state_manager.py":  "BC4D0E81FF808A2734E91157536CD8E87DB206DBC639A34C4E963B057369D3D4"
+}

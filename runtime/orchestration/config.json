@@ -1,0 +1,369 @@
+{
+  "version": "2.0",
+  "workflowStatus": "steady-state",
+  "mode": "agent-first",
+  "statusCatalog": ".github/orchestration/statuses.json",
+  "retryConfig": {
+    "enabled": true,
+    "maxRetries": 3,
+    "backoffStrategy": "exponential",
+    "initialDelayMs": 1000,
+    "maxDelayMs": 30000,
+    "backoffMultiplier": 2.0,
+    "jitterEnabled": true,
+    "retryableHttpCodes": [408, 429, 500, 502, 503, 504],
+    "retryableErrors": ["timeout", "connection_reset", "connection_refused", "temporarily_unavailable"],
+    "nonRetryableHttpCodes": [400, 401, 403, 404, 422],
+    "timeouts": {
+      "adoApi": 120,
+      "githubApi": 120,
+      "librarianAuthApi": 30,
+      "librarianDataApi": 60,
+      "mcpHealthCheck": 40
+    }
+  },
+  "pipeline": {
+    "name": "DRL Pipeline Workflow",
+    "stateDir": ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state",
+    "layout": {
+      "canonical": {
+        "agentsRoot": ".github/agents",
+        "promptsRoot": ".github/agents/Drl Pipeline/prompts",
+        "skillsRoot": ".github/skills",
+        "drlConversionSkillsRoot": ".github/skills",
+        "orchestrationRoot": ".github/orchestration",
+        "stateRoot": ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state",
+        "runtimeMemoryRoot": ".github/agents/Drl Pipeline/state/learning",
+        "artifactsRoot": ".github/agents/Drl Pipeline/artifacts"
+      }
+    },
+    "stateCompression": {
+      "enabled": true,
+      "maxRunHistory": 20,
+      "maxErrorsPerStage": 10,
+      "maxAgentMessages": 20,
+      "warnSizeKb": 50
+    },
+    "auditTrail": {
+      "enabled": true,
+      "format": "jsonl",
+      "directory": ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state",
+      "filePattern": "audit-<ticket-id>.jsonl",
+      "summaryOnCompletion": true,
+      "traceabilityMatrix": true
+    },
+    "runtimeArtifacts": {
+      "ticketScopedRoot": ".github/agents/Drl Pipeline/artifacts/<ticket-id>",
+      "ticketStateRoot": ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state",
+      "sharedStateRoot": ".github/agents/Drl Pipeline/state",
+      "sharedMemoryRoot": ".github/agents/Drl Pipeline/state/learning",
+      "rule": "Ticket-specific JSON, markdown, CQL, DRL, patches, PR assets, and audit files live under ticketScopedRoot. Cross-ticket learned summaries live only under sharedMemoryRoot."
+    },
+    "adapters": {
+      "githubCopilot": {
+        "name": "GitHub Copilot",
+        "entryPoint": ".github/copilot-instructions.md"
+      }
+    }
+  },
+  "orchestrator": {
+    "agent": "drlFlowOrchestrator",
+    "entryStateFile": ".github/agents/Drl Pipeline/state/run-input.json",
+    "stateResolution": {
+      "enabled": true,
+      "ticketIdSource": ".github/agents/Drl Pipeline/state/run-input.json",
+      "ticketIdField": "ticketId",
+      "stateFileTemplate": ".github/agents/Drl Pipeline/artifacts/{ticketId}/state",
+      "pipelineStatusTemplate": ".github/agents/Drl Pipeline/artifacts/{ticketId}/state/pipeline-status.json",
+      "approvalFileTemplate": ".github/agents/Drl Pipeline/artifacts/{ticketId}/state/approval-status.json",
+      "masterIndexFile": ".github/agents/Drl Pipeline/state/tickets-index.json",
+      "createDirectoryIfMissing": true,
+      "description": "Resolves per-ticket state paths at runtime using ticketId from run-input.json"
+    }
+  },
+  "adoDefaults": {
+    "organization": "healthcatalyst",
+    "projectName": "MeasureAble 2.0",
+    "projectUrl": "https://dev.azure.com/healthcatalyst/MeasureAble%202.0"
+  },
+  "githubRepo": {
+    "owner": "AbleHealth",
+    "repo": "rules-engine",
+    "baseBranch": "main",
+    "drlTargetPath": "src/main/resources/com/ablehealth/measure",
+    "jsonTargetPath": "src/test/resources/measures/{measureFamilyLower}/year{measureYear}",
+    "testTargetPath": "src/test/java/com/ablehealth/measures/{measureFamilyLower}/year{measureYear}",
+    "branchPattern": "feature/create-{measureFamilyLower}{measureNumber}-{measureYear}-ab{ticketId}"
+  },
+  "rulesEngineWorkspace": {
+    "mode": "parent-with-agent-submodule",
+    "submodulePath": "measureable_content_agent",
+    "verifiedBranch": "feature/rule-engine-submodule-measureable-content-agents",
+    "rootCandidates": [
+      "${workspaceFolder:rules-engine}",
+      "${env:RULES_ENGINE_REPO_PATH}",
+      ".."
+    ],
+    "drlRoot": "src/main/resources/com/ablehealth/measure",
+    "programDrlPathTemplate": "src/main/resources/com/ablehealth/measure/{measureFamilyLower}/year{measureYear}",
+    "priorProgramDrlPathTemplate": "src/main/resources/com/ablehealth/measure/{measureFamilyLower}/year{previousYear}",
+    "configLoadRulesRoot": "src/main/resources/config_load_rules",
+    "testRoot": "src/test/java/com/ablehealth/measures",
+    "rule": "When opened through rules-engine.code-workspace, inspect parent rules-engine DRLs and mapper JSONs directly before applying DRL skill guidance. Do not require bundled DRL examples."
+  },
+  "measureFamilies": {
+    "default": "mips",
+    "supported": [
+      "mips",
+      "ecqm",
+      "hedis",
+      "cms"
+    ],
+    "mipsBoundary": "MIPS-specific naming and DRL guidance applies only when measureFamily is mips. Other families must use family-specific naming, templates, and domain rules."
+  },
+  "apiPayload": {
+    "enabled": true,
+    "auth": {
+      "url": "https://librarian.admin.ablehealth.com/auth/login",
+      "method": "POST",
+      "requiredEnv": [
+        "API_AUTH_BASIC_TOKEN"
+      ],
+      "headers": {
+        "Accept": "*/*",
+        "User-Agent": "PostmanRuntime/7.51.1",
+        "Authorization": "Basic ${API_AUTH_BASIC_TOKEN}"
+      },
+      "tokenJsonPath": "access_token"
+    },
+    "data": {
+      "urlTemplate": "https://librarian.admin.ablehealth.com/api/v0/measures/{measureSpecification}/published_test",
+      "draftUrlTemplate": "https://librarian.admin.ablehealth.com/api/v0/measures/{measureSpecification}/draft_test",
+      "measureSpecificationFormat": "{measureYearShort}-{measureFamilyLower}-{measureSlug}",
+      "measureSlugFormat": "{measureFamilyLower}{measureNumberPadded}rate{rateNumber}",
+      "measureSpecificationExample": "26-mips-mips007rate1",
+      "method": "GET",
+      "headers": {
+        "Accept": "application/json",
+        "Account": "QA1013",
+        "lastKey": "1"
+      },
+      "authorizationFromAuthResponse": {
+        "tokenJsonPath": "access_token",
+        "headerName": "Authorization",
+        "headerValueTemplate": "Bearer {token}"
+      },
+      "outputFilePattern": "{measureSlug}.json"
+    }
+  },
+  "testRunFile": {
+    "templatePath": "rules-engine/src/test/java/com/ablehealth/measures/mips/year2026/Year2026Mips047Test.java",
+    "previousYearSourcePathPattern": "src/test/java/com/ablehealth/measures/{measureFamilyLower}/year{previousYear}/Year{previousYear}{measureFamilyPascal}{measureNumber}Test.java",
+    "strictPreviousYearClone": true,
+    "classNamePattern": "Year{measureYear}{measureFamilyPascal}{measureNumber}Test",
+    "outputFilePattern": "Year{measureYear}{measureFamilyPascal}{measureNumber}Test.java"
+  },
+  "governance": {
+    "enabled": true,
+    "guardrails": {
+      "slashOnlyExecution": false,
+      "mcpPreferredForAdo": true,
+      "mcpPreferredForPrMetadata": true,
+      "allowPatHttpsFallback": true,
+      "patHttpsFallbackScope": "mcp-wrapped-intake-extraction-only",
+      "approvalRequiredBeforeConversion": false,
+      "approvalRequiredBeforePrSubmission": true,
+      "explicitApprovalCommandRequired": true,
+      "usePrSourceBranchOverMain": true,
+      "baselineTemplateRequiredBeforeConversion": true,
+      "ticketTraceabilityRequired": true,
+      "guideReferenceRequiredInMapping": true,
+      "dynamicSkillLoadingPreferred": true,
+      "mergedSourceIntakePreferred": true,
+      "mappingMustCiteSkillsUsed": true,
+      "artifactContainmentRequired": true,
+      "blockPlaceholderOnlyDrl": true,
+      "referenceFactModelRequired": true,
+      "multiTicketStateRequired": true
+    }
+  },
+  "agents": {
+    "sourceIntake": {
+      "slash": "/drlSourceIntake",
+      "file": ".github/agents/drl-source-intake.agent.md",
+      "promptModule": ".github/agents/Drl Pipeline/prompts/source-intake.md",
+      "stateManager": ".github/agents/Drl Pipeline/scripts/state_manager.py:TicketStateManager",
+      "readState": [
+        ".github/agents/Drl Pipeline/state/run-input.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json"
+      ],
+      "writes": [
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/intake.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/extraction.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/plan.md",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/cqls/extraction/...",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/approval-status.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json",
+        ".github/agents/Drl Pipeline/state/tickets-index.json"
+      ]
+    },
+    "baselineTemplate": {
+      "slash": "/drlBaselineBuilder",
+      "file": ".github/agents/drl-baseline-builder.agent.md",
+      "stateManager": ".github/agents/Drl Pipeline/scripts/state_manager.py:TicketStateManager",
+      "readState": [
+        ".github/agents/Drl Pipeline/state/run-input.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/intake.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/extraction.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json"
+      ],
+      "writes": [
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/drls/baseline/<measure-slug>.drl",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/baseline/<measure-slug>-baseline.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/cqls/baseline/<measure-slug>-source-cql-<year>.cql",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/patches/<measure-slug>-cql-diff.patch",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json",
+        ".github/agents/Drl Pipeline/state/tickets-index.json"
+      ]
+    },
+    "approval": {
+      "slash": "/drlApprovalRecorder",
+      "file": ".github/agents/drl-approval-recorder.agent.md",
+      "stateManager": ".github/agents/Drl Pipeline/scripts/state_manager.py:TicketStateManager",
+      "readState": [
+        ".github/agents/Drl Pipeline/state/run-input.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/mapping.md",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/approval-status.json"
+      ],
+      "reads": [
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/mapping.md",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/approval-status.json"
+      ],
+      "writes": [
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/approval-status.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json",
+        ".github/agents/Drl Pipeline/state/tickets-index.json"
+      ]
+    },
+    "conversion": {
+      "slash": "/drlConverter",
+      "file": ".github/agents/drl-converter.agent.md",
+      "stateManager": ".github/agents/Drl Pipeline/scripts/state_manager.py:TicketStateManager",
+      "dynamicSkillCandidates": [
+        ".github/skills/hedis-drl/SKILL.md",
+        ".github/skills/mips-drl/SKILL.md",
+        ".github/skills/cqm-drl/SKILL.md",
+        ".github/skills/drl-review-rules/SKILL.md"
+      ],
+      "readState": [
+        ".github/agents/Drl Pipeline/state/run-input.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/extraction.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/baseline/<measure-slug>-baseline.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/drls/baseline/<measure-slug>.drl"
+      ],
+      "writes": [
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/drls/generated/<measure-slug>.drl",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/mapping.md",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/patches/<ticket-id>-<measure-slug>-drl.patch",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json",
+        ".github/agents/Drl Pipeline/state/tickets-index.json"
+      ]
+    },
+    "apiArtifact": {
+      "slash": "/drlApiBuilder",
+      "file": ".github/agents/drl-api-builder.agent.md",
+      "stateManager": ".github/agents/Drl Pipeline/scripts/state_manager.py:TicketStateManager",
+      "readState": [
+        ".github/agents/Drl Pipeline/state/run-input.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/intake.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/mapping.md",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json"
+      ],
+      "writes": [
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/pr-assets/<measure-slug>.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json",
+        ".github/agents/Drl Pipeline/state/tickets-index.json"
+      ]
+    },
+    "testArtifact": {
+      "slash": "/drlTestBuilder",
+      "file": ".github/agents/drl-test-builder.agent.md",
+      "stateManager": ".github/agents/Drl Pipeline/scripts/state_manager.py:TicketStateManager",
+      "readState": [
+        ".github/agents/Drl Pipeline/state/run-input.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/pr-assets/<measure-slug>.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json"
+      ],
+      "writes": [
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/pr-assets/Year<measureYear><measureFamilyPascal><measureNumber>Test.java",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json",
+        ".github/agents/Drl Pipeline/state/tickets-index.json"
+      ]
+    },
+    "pr": {
+      "slash": "/drlPrSubmitter",
+      "file": ".github/agents/drl-pr-submitter.agent.md",
+      "stateManager": ".github/agents/Drl Pipeline/scripts/state_manager.py:TicketStateManager",
+      "readState": [
+        ".github/agents/Drl Pipeline/state/run-input.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/mapping.md",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/pr-assets/<measure-slug>.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/pr-assets/Year<measureYear><measureFamilyPascal><measureNumber>Test.java",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/approval-status.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json"
+      ],
+      "writes": [
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/pr.md",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json",
+        ".github/agents/Drl Pipeline/state/tickets-index.json"
+      ]
+    },
+    "reset": {
+      "slash": "/drlTicketReset",
+      "file": ".github/agents/drl-ticket-reset.agent.md",
+      "stateManager": ".github/agents/Drl Pipeline/scripts/state_manager.py:TicketStateManager",
+      "readState": [
+        ".github/agents/Drl Pipeline/state/run-input.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/approval-status.json"
+      ],
+      "reads": [
+        ".github/agents/Drl Pipeline/state/run-input.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/approval-status.json"
+      ],
+      "writes": [
+        ".github/agents/Drl Pipeline/state/tickets-index.json"
+      ],
+      "deletes": [
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/"
+      ]
+    },
+    "learning": {
+      "slash": "/drlLearning",
+      "file": ".github/agents/drl-learning.agent.md",
+      "optional": true,
+      "nonBlocking": true,
+      "backgroundMode": true,
+      "description": "Passive aggregation of metrics, CQL patterns, and error insights. Never blocks main pipeline.",
+      "readState": [
+        ".github/agents/Drl Pipeline/state/run-input.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/extraction.json",
+        ".github/agents/Drl Pipeline/artifacts/<ticket-id>/state/pipeline-status.json"
+      ],
+      "writes": [
+        ".github/agents/Drl Pipeline/state/learning/execution-metrics.json",
+        ".github/agents/Drl Pipeline/state/learning/cql-patterns.json",
+        ".github/agents/Drl Pipeline/state/learning/error-patterns.json"
+      ]
+    }
+  },
+  "notes": {
+    "workflow": "Uses ticket-first artifacts and ticket-scoped state directories under the DRL Pipeline bundle",
+    "stateResolution": "All <ticket-id> placeholders are resolved at agent runtime using ticket ID from run-input.json",
+    "index": "Master index at .github/agents/Drl Pipeline/state/tickets-index.json tracks all active tickets and their current stages",
+    "bundleStructure": "DRL Pipeline agents are organized under .github/agents/Drl Pipeline/ for portability and self-containment"
+  }
+}
