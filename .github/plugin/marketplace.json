@@ -1,0 +1,16 @@
+{
+  "name": "measureable-agents",
+  "owner": {
+    "name": "TriptiMandhyan"
+  },
+  "metadata": {
+    "description": "MeasureAble agents packaged as plugins"
+  },
+  "plugins": [
+    {
+      "name": "drl-pipeline",
+      "source": "./",
+      "description": "CQL-to-DRL conversion pipeline: source intake, baseline, conversion, approval, API JSON, tests, and GitHub PR."
+    }
+  ]
+}

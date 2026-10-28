@@ -70,9 +70,17 @@ The `local-python` server is bundled with the plugin and starts on its own. If a
 
 ## Install
 
-1. Run **Chat: Install Plugin From Source** in VS Code and enter `https://github.com/TriptiMandhyan/Agent-Plugin` (the plugin must be on the repo's default branch).
-2. Add the `ado-content` server and set the environment variables (see Requirements), then restart VS Code.
-3. Open the project you work in (for example `rules-engine`), select `drlFlowOrchestrator`, and give it a ticket ID or work-item URL.
+1. Add this repo as a marketplace in your VS Code user settings (`settings.json`), pointing at the branch that holds the plugin:
+
+   ```json
+   "chat.plugins.marketplaces": ["TriptiMandhyan/Agent-Plugin#measureable-agents-plugin"]
+   ```
+
+2. In the Extensions view, search `@agentPlugins` and install **drl-pipeline**. VS Code then checks for new versions about every 24 hours, so updates arrive on their own.
+3. Add the `ado-content` server and set the environment variables (see Requirements), then restart VS Code.
+4. Open the project you work in (for example `rules-engine`), select `drlFlowOrchestrator`, and give it a ticket ID or work-item URL.
+
+You can also install without the marketplace through **Chat: Install Plugin From Source** with the repo URL, but the plugin must then be on the repo's default branch and updates are manual (`/plugin update`).
 
 Nobody has to start a server by hand: VS Code launches `local-python` and `ado-content` when they are needed.
 
