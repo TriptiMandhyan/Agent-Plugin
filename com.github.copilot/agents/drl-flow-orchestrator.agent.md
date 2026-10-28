@@ -46,7 +46,7 @@ Execute CQL → DRL pipeline end-to-end with minimal token overhead. Source inta
 | Mark stage complete | `mcp_local-python-_state_write_pipeline(stage, ticket_id)` | After each stage |
 | Read approval status | `mcp_local-python-_state_read_approval(ticket_id)` | Before API/test/PR stages |
 | Write approval | `mcp_local-python-_state_write_approval(approved, approved_by, notes, ticket_id)` | After drlApprovalRecorder |
-| Export artifacts for review | `mcp_local-python-_export_artifacts(ticket_id)` | At the approval pause and after the PR is submitted |
+| Locate artifacts for review | `mcp_local-python-_list_artifacts(ticket_id)` | At the approval pause and after the PR is submitted |
 | Reset all artifacts | `mcp_local-python-_state_reset_ticket_baseline(ticket_id)` | Only inside `/drlTicketReset` after explicit user reset request |
 
 ## Linear Workflow
@@ -72,12 +72,12 @@ Execute CQL → DRL pipeline end-to-end with minimal token overhead. Source inta
 | `extraction-complete` | `runSubagent("drlBaselineBuilder")` | **BASELINE FIRST, NOT CONVERTER!** |
 | `baseline-template-ready` | `runSubagent("drlConverter")` | Now convert after baseline ready |
 | `conversion-ready` | `runSubagent("drlConverter")` | Baseline already built — convert now |
-| `conversion-complete` | Export artifacts for review, then STOP and ask for `/drlApprovalRecorder` | Wait for human approval |
-| `awaiting-approval` | Export artifacts for review, then STOP and ask for `/drlApprovalRecorder` | Approval not yet recorded |
+| `conversion-complete` | Report the artifacts folder for review, then STOP and ask for `/drlApprovalRecorder` | Wait for human approval |
+| `awaiting-approval` | Report the artifacts folder for review, then STOP and ask for `/drlApprovalRecorder` | Approval not yet recorded |
 | `pr-ready` | `runSubagent("drlApiBuilder")` | Build API artifacts |
 | `api-artifact-ready` | `runSubagent("drlTestBuilder")` | Build test files |
 | `test-artifact-ready` | `runSubagent("drlPrSubmitter")` | Submit PR to GitHub |
-| `pr-submitted` | Export artifacts, then done (report PR link and export folder) | Pipeline complete |
+| `pr-submitted` | Done (report PR link and artifacts folder) | Pipeline complete |
 
 
 **Execution**: After reading pipeline stage, immediately call `runSubagent(agentName, description, prompt)`:
@@ -123,7 +123,7 @@ Execute CQL → DRL pipeline end-to-end with minimal token overhead. Source inta
 - Mark complete: `state_write_pipeline("conversion-complete", ticket_id)`
 
 ### **PAUSE: Wait for Approval**
-Before asking, call `mcp_local-python-_export_artifacts(ticket_id)` so the user can review the changes. The artifacts otherwise live in the plugin data folder, which the user cannot browse from the workspace. Tell the user the `exportedTo` folder and point them at what to review: `patches/*-drl.patch` (the DRL changes), `mapping.md`, `drls/generated/`, and `plan.md`. If the tool fails, report `sourceDir` or the error instead.
+Before asking, call `mcp_local-python-_list_artifacts(ticket_id)` so the user knows where to review the changes. Artifacts live in the `drl-pipeline/` folder of the user's open project. Tell the user the `artifactsDir` path and point them at what to review: `patches/*-drl.patch` (the DRL changes), `mapping.md`, `drls/generated/`, and `plan.md`. If the tool fails, report the error instead.
 
 Then ask user to invoke exactly once:
 ```

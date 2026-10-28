@@ -16,25 +16,27 @@ You give `drlFlowOrchestrator` an Azure DevOps ticket ID or work-item URL. It re
 | 6. Tests | `drlTestBuilder` | Builds the current-year Java test artifacts. |
 | 7. Pull request | `drlPrSubmitter` | Pushes only the approved changes to a remote branch and opens the GitHub PR. It never touches your local `rules-engine` checkout. |
 
-The pipeline pauses after stage 3. Review the exported files (see below), then run `/drlApprovalRecorder` with your name. `drlLearning` and `drlTicketReset` are helpers; reset only when you want a clean rerun.
+The pipeline pauses after stage 3. Review the generated files (see below), then run `/drlApprovalRecorder` with your name. `drlLearning` and `drlTicketReset` are helpers; reset only when you want a clean rerun.
 
 ## Where files are stored
 
-Artifacts are written to `${PLUGIN_DATA}/drl-pipeline/`, not the install folder (on Windows, under `%USERPROFILE%\.copilot\plugin-data\`):
+Artifacts are written to a `drl-pipeline/` folder in the project you have open (the MCP server's working directory), so you can open and diff them in the editor:
 
 ```
-artifacts/<ticket-id>/
-  intake.json, extraction.json, plan.md
-  cqls/extraction/            fetched CQL
-  drls/baseline/, drls/generated/
-  patches/                    CQL diffs and DRL patches
-  mapping.md
-  state/                      pipeline and approval status
-  pr-assets/                  measure JSON for the PR
-state/run-input.json, state/tickets-index.json, state/learning/
+drl-pipeline/
+  .gitignore                  contains "*", so git ignores the whole folder
+  artifacts/<ticket-id>/
+    intake.json, extraction.json, plan.md
+    cqls/extraction/          fetched CQL
+    drls/baseline/, drls/generated/
+    patches/                  CQL diffs and DRL patches
+    mapping.md
+    state/                    pipeline and approval status
+    pr-assets/                measure JSON for the PR
+  state/run-input.json, state/tickets-index.json, state/learning/
 ```
 
-That folder is outside your project, so use the export described under "Reviewing generated files" to see the files in your workspace. Artifacts are kept until you delete them.
+The folder is git-ignored, and the pull request does not use local git: `drlPrSubmitter` reads the approved files from this folder and commits them to GitHub through the API. Set the `DRL_DATA_DIR` environment variable to use a different folder. Artifacts are kept until you delete them.
 
 ## Contents
 
@@ -76,19 +78,19 @@ Nobody has to start a server by hand: VS Code launches `local-python` and `ado-c
 
 ## Reviewing generated files
 
-Before asking for approval, and again after the PR is submitted, `drlFlowOrchestrator` calls the `export_artifacts` tool. It copies the ticket's files to `drl-output/<ticket-id>/` under the MCP server's working directory (normally the open workspace) and reports the exact path. Review these before approving:
+Before asking for approval, `drlFlowOrchestrator` calls the `list_artifacts` tool and tells you the exact folder, `drl-pipeline/artifacts/<ticket-id>/`. Review these before approving:
 
 - `patches/*-drl.patch`: the DRL changes
 - `mapping.md`, `plan.md`
 - `drls/generated/`: the full generated DRLs
 
-The export is a copy; the agents keep working from the plugin data folder.
+If you edit a generated DRL after approving, the PR step refuses to push (it checks the files against the approved patch), so make changes first or approve again.
 
 ## Known limitations
 
 - The MCP server starts through `py -3 -m uv`, so it currently assumes Windows with the Python launcher.
 - Some text under `runtime/agents/Drl Pipeline/` and in the agents still shows the original repo paths (`.github/agents/Drl Pipeline/...`). The MCP tools resolve them to the data folder.
-- `export_artifacts` writes relative to the MCP server's working directory; it reports the full path either way.
+- If the MCP server is started from a folder that isn't your project, `drl-pipeline/` is created there instead; the agent reports the full path.
 
 ## For maintainers: updating from source
 

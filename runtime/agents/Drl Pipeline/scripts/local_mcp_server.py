@@ -29,13 +29,13 @@ from typing import Any, Callable
 
 from fastapi import FastAPI
 from mcp.server.fastmcp import FastMCP
-from state_manager import PipelineStage, TicketStateManager
+from state_manager import PipelineStage, TicketStateManager, resolve_data_dir
 from learning_engine import LearningEngine
 
 
 BUNDLE_DIR = Path(__file__).resolve().parent.parent
-# Read-only plugin files live in BUNDLE_DIR; mutable state and artifacts go to DRL_DATA_DIR (PLUGIN_DATA).
-ROOT_DIR = Path(os.environ.get("DRL_DATA_DIR") or BUNDLE_DIR).resolve()
+# Read-only plugin files live in BUNDLE_DIR; mutable state and artifacts go to the data dir.
+ROOT_DIR = resolve_data_dir()
 ORCHESTRATION_CONFIG_PATH = Path(
     os.environ.get("ORCHESTRATION_CONFIG_PATH")
     or BUNDLE_DIR.parent.parent / "orchestration" / "config.json"
@@ -4355,32 +4355,20 @@ def read_artifact(relative_path: str, ticket_id: str = "") -> dict[str, Any]:
 
 
 @mcp.tool()
-def export_artifacts(ticket_id: str = "", destination: str = "") -> dict[str, Any]:
-    """Copy a ticket's artifacts out of the plugin data folder so the user can review them.
-
-    destination defaults to drl-output/<ticket-id> under the server's working directory.
-    """
+def list_artifacts(ticket_id: str = "") -> dict[str, Any]:
+    """Return the folder holding a ticket's artifacts and the files in it, so the user can review them."""
     try:
         resolved_ticket = _resolve_ticket_id(ticket_id)
-        source = (ROOT_DIR / "artifacts" / resolved_ticket).resolve()
-        if not source.is_dir():
+        base = (ROOT_DIR / "artifacts" / resolved_ticket).resolve()
+        if not base.is_dir():
             return {"ok": False, "error": f"No artifacts for ticket {resolved_ticket}."}
-        raw_dest = str(destination or "").strip()
-        dest = (Path(raw_dest) if raw_dest else Path("drl-output") / resolved_ticket)
-        dest = (dest if dest.is_absolute() else Path.cwd() / dest).resolve()
-        if dest == ROOT_DIR or ROOT_DIR in dest.parents or source in dest.parents:
-            return {"ok": False, "error": "Destination must be outside the plugin data folder."}
-        if dest.exists() and not dest.is_dir():
-            return {"ok": False, "error": f"Destination is a file: {dest}"}
-        shutil.copytree(source, dest, dirs_exist_ok=True, ignore=shutil.ignore_patterns("*.tmp"))
         files = sorted(
-            str(p.relative_to(dest)).replace("\\", "/") for p in dest.rglob("*") if p.is_file()
+            str(p.relative_to(base)).replace("\\", "/") for p in base.rglob("*") if p.is_file()
         )
         return {
             "ok": True,
             "ticketId": resolved_ticket,
-            "sourceDir": str(source),
-            "exportedTo": str(dest),
+            "artifactsDir": str(base),
             "fileCount": len(files),
             "files": files,
         }

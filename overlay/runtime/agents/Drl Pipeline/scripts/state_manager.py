@@ -13,6 +13,19 @@ from enum import Enum
 from typing import Dict, Any, Optional, Union
 
 
+def resolve_data_dir() -> Path:
+    """Folder for artifacts and state: DRL_DATA_DIR if set, else <working dir>/drl-pipeline."""
+    raw = os.environ.get("DRL_DATA_DIR", "").strip()
+    # A literal "${...}" means the host did not substitute the placeholder.
+    path = Path(raw) if raw and "${" not in raw else Path.cwd() / "drl-pipeline"
+    path = path.resolve()
+    path.mkdir(parents=True, exist_ok=True)
+    gitignore = path / ".gitignore"
+    if not gitignore.exists():
+        gitignore.write_text("*\n", encoding="utf-8")
+    return path
+
+
 class PipelineStage(str, Enum):
     """Canonical pipeline stages for all agents."""
 
@@ -32,8 +45,7 @@ class PipelineStage(str, Enum):
 class TicketStateManager:
     """Manages state for individual tickets with per-ticket directories."""
 
-    # Use absolute paths to ensure correct resolution regardless of working directory
-    _BASE_DIR = Path(os.environ.get("DRL_DATA_DIR") or Path(__file__).resolve().parent.parent).resolve()
+    _BASE_DIR = resolve_data_dir()
     INDEX_FILE = _BASE_DIR / "state" / "tickets-index.json"
     RUN_INPUT_FILE = _BASE_DIR / "state" / "run-input.json"
     

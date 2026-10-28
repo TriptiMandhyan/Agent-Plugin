@@ -21,7 +21,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-ROOT_DIR = Path(os.environ.get("DRL_DATA_DIR") or Path(__file__).resolve().parent.parent).resolve()
+from state_manager import resolve_data_dir
+
+ROOT_DIR = resolve_data_dir()
 
 
 class LearningEngine:
