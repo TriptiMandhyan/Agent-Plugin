@@ -1,0 +1,155 @@
+library HEDIS_SNS6_2027
+
+/*
+ * Internal ID: 27.HEDIS.Sns6
+ * Subject Type: Patient
+ * Inverse Measure: False
+ */
+
+using ADM
+
+include "2027/HEDIS/shared/HospiceDuringPeriod.cql" called Hospice
+include "2027/HEDIS/shared/LTIDuringPeriod.cql" called LTI
+include "2027/HEDIS/shared/DeceasedDuringPeriod.cql" called DeceasedDuringPeriod
+include "2027/HEDIS/shared/ContinuousEnrollmentShared.cql" called CEShared
+
+
+// VALUESETS
+valueset "HEDIS; TRANSPORTATION_INSECURITY_PROCEDURES": '2.16.840.1.113883.3.464.1004.2264'
+
+// DIRECT REFERENCE HEDIS VALUESETS
+valueset "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_AAFP_SHORT_FORM"
+valueset "HEDIS; DIRECT_REFERENCE_PARTIAL_TRANSPORTATION_SCREENING_TOOLS"
+valueset "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_CUBS_SCREENING"
+valueset "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_PROMIS_SCREENING"
+valueset "HEDIS; DIRECT_REFERENCE_MULTI_TRANSPORTATION_SCREENING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA33_6_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA33093_8_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA29233_6_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA30024_6_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA30134_3_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA30026_1_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA29232_8_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA29234_4_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA30133_5_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA30027_9_POSITIVE_FINDING_CODE"
+
+
+parameter "Measurement Period" Interval<DateTime>
+
+context Patient
+
+// POPULATIONS
+define "HEDIS Certification Eligible Population"  //should be included in HEDIS output
+    AgeInYearsAt(start of "Measurement Period") > 0 //Age for HEDIS output should be age at start of "Measurement Period"
+    and not exists(Patient.deceased_datetime before start of "Measurement Period")
+
+define "Denominator":
+    "HEDIS Certification Eligible Population"
+    and exists("First Positive Transportation Insecurity") FirstTransportationInsecurity //denominator event = true in the HEDIS output if exists("First Positive Transportation Insecurity")
+    ,
+    if exists("Denominator")
+    return 
+    ExtendedMeasureResultV2(
+        FirstTransportationInsecurity
+        , 'First Evidence of Transportation Insecurity' as name
+        , display_date = FirstTransportationInsecurity.start_date
+        , calculated_record = false
+        , population = Denominator
+        , option_id = all
+    )
+
+define "Denominator Exclusion - Deceased":
+/* OptionID: denominator_exclusion_deceased */
+    exists(DeceasedDuringPeriod."Deceased During Period"("Measurement Period"))
+
+define "Denominator Exclusion - LTI and SNP":
+/* Option ID: denominator_exclusion_LTI */
+    (   LTI."LTI During Period"("Measurement Period") or LTI."SNP"("Measurement Period"))LTIPeriod
+    ,
+    return
+    ExtendedMeasureResultV2(
+        LTIPeriod // Return only 1 record even if multiple LTI or SNP evidence exist
+        , 'Evidence of LTI or SNP' as name
+        , display_date = start_date
+        , calculated_record = false
+        , population = Exclusion
+        , option_id = denominator_exclusion_LTI
+    )
+
+define "Denominator Exclusion - Hospice":
+/* Option ID: denominator_exclusion_hospice */
+    exists(Hospice."Hospice During Period"("Measurement Period"))HospiceDuringPeriod
+    ,
+    return
+    ExtendedMeasureResultV2(
+        HospiceDuringPeriod // Return only 1 record even if multiple hospice evidence exist
+        , 'Evidence of Hospice' as name
+        , display_date = start_date
+        , calculated_record = false
+        , population = Exclusion
+        , option_id = denominator_exclusion_hospice
+    )
+
+define "Numerator Performance Met":
+/* Option ID: performance_met */
+    (   exists  (   ["Clinical Activity": "HEDIS; TRANSPORTATION_INSECURITY_PROCEDURES"] TransportationIntervention
+                    with "First Positive Transportation Insecurity" FirstTransportationInsecurity
+                    such that TransportationIntervention.start_date during Interval[FirstTransportationInsecurity.start_date, FirstTransportationInsecurity.start_date + 30 days]   )
+    ) TransportationScreeningIntervention
+    ,
+    return
+    ExtendedMeasureResultV2(
+        TransportationScreeningIntervention // Return only 1 record even if multiple screenings exist
+        , 'Intervention within 30 days of Transportation Insecurity Finding' as name
+        , display_date = start_date
+        , calculated_record = false
+        , population = Numerator Performance Met
+        , option_id = performance_met
+    )
+
+define "Numerator Performance Not Met":
+/* Option ID: performance_not_met */
+    not "Denominator Exclusion - Deceased"
+    and not "Denominator Exclusion - LTI and SNP"
+    and not "Denominator Exclusion - Hospice"
+    and not "Numerator Performance Met"
+
+define "Continuous Enrollment - SNS":
+    if start of "Measurement Period" is after "GetMaxCoverageEndDateForPayer"(P)
+    return false,
+    else
+        CEShared."HasContinuousEnrollmentByBenefitTypes"(
+            Interval[start of "Measurement Period", first("GetMaxCoverageEndDateForPayer"(P), end of "Measurement Period")]
+            , {'medical'}
+            , maxAllowedGapDays 45
+            , minConsecutiveGapDays 45
+            , maxAllowedGaps 1
+        )
+        and CEShared."HasEnrollmentOnDateByBenefitTypes"(first("GetMaxCoverageEndDateForPayer"(P), end of "Measurement Period"), {'medical'})
+
+// DEFINITIONS
+define "Screening Period":
+    Interval[start of "Measurement Period", start of "Measurement Period" + 11 months]
+
+define "First Positive Transportation Insecurity":
+    (   First   (   (   (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_AAFP_SHORT_FORM"] AAFP
+                            where   (   AAFP.result_code_type, AAFP.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA33093_8_POSITIVE_FINDING_CODE"]
+                                        or AAFP.result_code_type, AAFP.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA30134_3_POSITIVE_FINDING_CODE"] )   )
+                        union   (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_PARTIAL_TRANSPORTATION_SCREENING_TOOLS"] Partial
+                                    where Partial.result_code_type, Partial.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA33_6_POSITIVE_FINDING_CODE"]   )
+                        union   (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_CUBS_SCREENING"] CUBS
+                                    where   (   CUBS.result_code_type, CUBS.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA29232_8_POSITIVE_FINDING_CODE"]
+                                                or CUBS.result_code_type, CUBS.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA29233_6_POSITIVE_FINDING_CODE"]
+                                                or CUBS.result_code_type, CUBS.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA29234_4_POSITIVE_FINDING_CODE"] )   )
+                        union   (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_PROMIS_SCREENING"] PROMIS
+                                    where   (   PROMIS.result_code_type, PROMIS.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA30024_6_POSITIVE_FINDING_CODE"]
+                                                or PROMIS.result_code_type, PROMIS.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA30026_1_POSITIVE_FINDING_CODE"]
+                                                or PROMIS.result_code_type, PROMIS.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA30027_9_POSITIVE_FINDING_CODE"] )   )
+                        union   (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_MULTI_TRANSPORTATION_SCREENING_CODE"] Multi
+                                    where   (   Multi.result_code_type, Multi.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA30133_5_POSITIVE_FINDING_CODE"]
+                                                or Multi.result_code_type, Multi.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA30134_3_POSITIVE_FINDING_CODE"]   )   )
+                    ) Insecurity
+                    where Insecurity.start_date during "Screening Period"
+                )   sort by Insecurity.start_date
+    )   FirstTransportationInsecurity

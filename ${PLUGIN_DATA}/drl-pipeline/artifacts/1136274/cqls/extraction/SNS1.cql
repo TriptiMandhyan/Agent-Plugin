@@ -1,0 +1,119 @@
+library HEDIS_SNS1_2027
+
+/*
+ * Internal ID: 27.HEDIS.Sns1
+ * Subject Type: Patient
+ * Inverse Measure: False
+ */
+
+using ADM
+
+include "2027/HEDIS/shared/HospiceDuringPeriod.cql" called Hospice
+include "2027/HEDIS/shared/LTIDuringPeriod.cql" called LTI
+include "2027/HEDIS/shared/DeceasedDuringPeriod.cql" called DeceasedDuringPeriod
+include "2027/HEDIS/shared/ContinuousEnrollmentShared.cql" called CEShared
+
+// DIRECT REFERENCE HEDIS VALUESETS
+valueset "HEDIS; DIRECT_REFERENCE_AHC_AAFP_FOOD_SCREENINGS"
+valueset "HEDIS; DIRECT_REFERENCE_PARTIAL_FOOD_INSECURITY_INSTRUMENTS"
+valueset "HEDIS; DIRECT_REFERENCE_PRAPARE_FOOD_SCREENING"
+valueset "HEDIS; DIRECT_REFERENCE_HUNGER_VITAL_SIGN_SCREENING"
+valueset "HEDIS; DIRECT_REFERENCE_US_FSS_SCREENING"
+valueset "HEDIS; DIRECT_REFERENCE_WE_CARE_SURVEY_FOOD_SCREENING"
+
+parameter "Measurement Period" Interval<DateTime>
+
+context Patient
+
+// POPULATIONS
+define "HEDIS Certification Eligible Population" //should be included in HEDIS output
+    AgeInYearsAt(start of "Measurement Period") > 0 //Age for HEDIS output should be age at start of "Measurement Period"
+    and not exists(Patient.deceased_datetime before start of "Measurement Period")
+
+define "Denominator":
+    "HEDIS Certification Eligible Population" //denominator event = false as no event exists in HEDIS output
+
+define "Denominator Exclusion - Deceased":
+/* OptionID: denominator_exclusion_deceased */
+    exists(DeceasedDuringPeriod."Deceased During Period"("Measurement Period"))
+
+define "Denominator Exclusion - LTI and SNP":
+/* Option ID: denominator_exclusion_LTI */
+    exists(   LTI."LTI During Period"("Measurement Period") 
+            union  LTI."SNP"("Measurement Period")) LTIPeriod
+    ,
+    return
+    ExtendedMeasureResultV2(
+        LTIPeriod
+        , 'Evidence of LTI or SNP' as name
+        , display_date = start_date
+        , calculated_record = false
+        , population = Exclusion
+        , option_id = denominator_exclusion_LTI
+    )
+
+
+define "Denominator Exclusion - Hospice":
+/* Option ID: denominator_exclusion_hospice */
+    exists(Hospice."Hospice During Period"("Measurement Period"))HospiceDuringPeriod
+    ,
+    return  
+    ExtendedMeasureResultV2(
+        HospiceDuringPeriod
+        , 'Evidence of Hospice' as name
+        , display_date = start_date
+        , calculated_record = false
+        , population = Exclusion
+        , option_id = denominator_exclusion_hospice
+    )
+
+define "Numerator Performance Met":
+/* Option ID: performance_met */
+   exists ("Food Insecurity Screening") FoodInsecurityScreening
+   ,
+   return
+   ExtendedMeasureResultV2(
+        FoodInsecurityScreening // Return only 1 record even if multiple screenings exist
+        , 'Food Insecurity Screening' as name
+        , display_date = start_date
+        , calculated_record = false
+        , population = Numerator Performance Met
+        , option_id = performance_met
+    )
+
+
+define "Numerator Performance Not Met":
+/* Option ID: performance_not_met */
+    not "Denominator Exclusion - Deceased"
+    and not "Denominator Exclusion - LTI and SNP"
+    and not "Denominator Exclusion - Hospice"
+    and not "Numerator Performance Met"
+
+define "Continuous Enrollment - SNS":
+    if start of "Measurement Period" is after "GetMaxCoverageEndDateForPayer"(P)
+    return false,
+    else
+        CEShared."HasContinuousEnrollmentByBenefitTypes"(
+            Interval[start of "Measurement Period", first("GetMaxCoverageEndDateForPayer"(P), end of "Measurement Period")]
+            , {'medical'}
+            , maxAllowedGapDays 45
+            , minConsecutiveGapDays 45
+            , maxAllowedGaps 1
+        )
+        and CEShared."HasEnrollmentOnDateByBenefitTypes"(first("GetMaxCoverageEndDateForPayer"(P), end of "Measurement Period"), {'medical'})
+
+// DEFINITIONS
+define "Screening Period":
+    Interval[start of "Measurement Period", start of "Measurement Period" + 11 months]
+
+define "Food Insecurity Screening": // Note- due to the way PRAPARE is structured a 'blank' or 'null' answer is allowed.
+    exists  (   (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_AHC_AAFP_FOOD_SCREENINGS"]
+                    union ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_PARTIAL_FOOD_INSECURITY_INSTRUMENTS"]
+                    union ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_HUNGER_VITAL_SIGN_SCREENING"]
+                    union ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_US_FSS_SCREENING"]
+                    union ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_WE_CARE_SURVEY_FOOD_SCREENING"]) Insecurity
+                where   (   Insecurity.start_date during "Screening Period"
+                            and Insecurity.result is not null or empty   )  )
+    or exists  (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_PRAPARE_FOOD_SCREENING"]  ) AskedReFoodInsecurity //answer not required
+                   where AskedReFoodInsecurity.start_date during "Screening Period"
+

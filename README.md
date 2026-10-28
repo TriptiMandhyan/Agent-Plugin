@@ -49,14 +49,30 @@ That folder is outside your project, so use the export described under "Reviewin
 
 ## Requirements
 
-- Python with `uv` (`python -m uv --version`).
+- Python with `uv` (`python -m uv --version`) and Node.js (for `npx`).
 - Environment variables in the shell that launches VS Code: `ADO_PAT`, `GITHUB_TOKEN`, `API_AUTH_BASIC_TOKEN`; `LIBRARIAN_API_KEY` and `LIBRARIAN_API_SECRET` if used.
 - Recommended: a local `rules-engine` checkout, with `RULES_ENGINE_REPO_PATH` pointing to it.
-- The `ado-content` and `github-content` MCP servers are not bundled; configure them yourself.
+- An `ado-content` MCP server (used by `drlSourceIntake` to read Azure DevOps tickets). It is not bundled; add it once to your user MCP configuration (**MCP: Open User Configuration**), and VS Code starts it automatically:
+
+```json
+"ado-content": {
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "@azure-devops/mcp@next", "healthcatalyst", "-a", "envvar",
+           "-d", "core", "work", "work-items", "repositories", "search", "wiki", "pipelines", "advanced-security", "test-plans"],
+  "env": { "ADO_MCP_AUTH_TOKEN": "${env:ADO_PAT}" }
+}
+```
+
+The `local-python` server is bundled with the plugin and starts on its own. If a workspace already defines its own `local-python` or `ado-content` server, the names clash; use a workspace without them, such as `rules-engine`.
 
 ## Install
 
-Run **Chat: Install Plugin From Source** in VS Code with this repo's URL, then select `drlFlowOrchestrator` and give it a ticket ID or work-item URL.
+1. Run **Chat: Install Plugin From Source** in VS Code and enter `https://github.com/TriptiMandhyan/Agent-Plugin` (the plugin must be on the repo's default branch).
+2. Add the `ado-content` server and set the environment variables (see Requirements), then restart VS Code.
+3. Open the project you work in (for example `rules-engine`), select `drlFlowOrchestrator`, and give it a ticket ID or work-item URL.
+
+Nobody has to start a server by hand: VS Code launches `local-python` and `ado-content` when they are needed.
 
 ## Reviewing generated files
 

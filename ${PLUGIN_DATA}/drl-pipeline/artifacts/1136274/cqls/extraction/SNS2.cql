@@ -1,0 +1,149 @@
+library HEDIS_SNSE2_2027
+
+/*
+ * Internal ID: 27.HEDIS.Sns2
+ * Subject Type: Patient
+ * Inverse Measure: False
+ */
+
+using ADM
+
+include "2027/HEDIS/shared/HospiceDuringPeriod.cql" called Hospice
+include "2027/HEDIS/shared/LTIDuringPeriod.cql" called LTI
+include "2027/HEDIS/shared/DeceasedDuringPeriod.cql" called DeceasedDuringPeriod
+include "2027/HEDIS/shared/ContinuousEnrollmentShared.cql" called CEShared
+
+
+// VALUESETS
+valueset "HEDIS; FOOD_INSECURITY_PROCEDURES": '2.16.840.1.113883.3.464.1004.2262'
+
+// DIRECT REFERENCE HEDIS VALUESETS
+valueset "HEDIS; DIRECT_REFERENCE_AHC_AAFP_FOOD_SCREENINGS"
+valueset "HEDIS; DIRECT_REFERENCE_PARTIAL_FOOD_INSECURITY_INSTRUMENTS"
+valueset "HEDIS; DIRECT_REFERENCE_PRAPARE_FOOD_SCREENING"
+valueset "HEDIS; DIRECT_REFERENCE_HUNGER_VITAL_SIGN_SCREENING"
+valueset "HEDIS; DIRECT_REFERENCE_US_FSS_SCREENING"
+valueset "HEDIS; DIRECT_REFERENCE_WE_CARE_SURVEY_FOOD_SCREENING"
+valueset "HEDIS; DIRECT_REFERENCE_LA32_8_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA19952_3_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA30986_6_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA30125_1_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA28397_0_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA6729_3_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA33_6_POSITIVE_FINDING_CODE"
+valueset "HEDIS; DIRECT_REFERENCE_LA30985_8_POSITIVE_FINDING_CODE"
+
+
+parameter "Measurement Period" Interval<DateTime>
+
+context Patient
+
+// POPULATIONS
+define "HEDIS Certification Eligible Population" //should be included in HEDIS output
+    AgeInYearsAt(start of "Measurement Period") > 0 //Age for HEDIS output should be age at start of "Measurement Period"
+    and not exists(Patient.deceased_datetime before start of "Measurement Period")
+
+define "Denominator":
+    "HEDIS Certification Eligible Population" 
+    and exists("First Positive Food Insecurity") PositiveScreen //denominator event = true in the HEDIS output if exists("First Positive Food Insecurity")
+    ,
+    if exists("Denominator")
+    return 
+    ExtendedMeasureResultV2(
+        PositiveScreen
+        , 'First Evidence of Food Insecurity' as name
+        , display_date = PositiveScreen.start_date
+        , calculated_record = false
+        , population = Denominator
+        , option_id = all
+    )
+
+define "Denominator Exclusion - Deceased":
+/* OptionID: denominator_exclusion_deceased */
+    exists(DeceasedDuringPeriod."Deceased During Period"("Measurement Period"))
+
+define "Denominator Exclusion - LTI and SNP":
+/* Option ID: denominator_exclusion_LTI */
+    exists (   LTI."LTI During Period"("Measurement Period") or LTI."SNP"("Measurement Period"))LTIPeriod
+    ,
+    return
+    ExtendedMeasureResultV2(
+        LTIPeriod
+        , 'Evidence of LTI or SNP' as name
+        , display_date = start_date
+        , calculated_record = false
+        , population = Exclusion
+        , option_id = denominator_exclusion_LTI
+    )
+
+define "Denominator Exclusion - Hospice":
+/* Option ID: denominator_exclusion_hospice */
+    exists(Hospice."Hospice During Period"("Measurement Period")) HospiceDuringPeriod
+    ,
+    return  
+    ExtendedMeasureResultV2(
+        HospiceDuringPeriod
+        , 'Evidence of Hospice' as name
+        , display_date = start_date
+        , calculated_record = false
+        , population = Exclusion
+        , option_id = denominator_exclusion_hospice
+    )
+
+define "Numerator Performance Met":
+/* Option ID: performance_met */
+    exists("First Positive Food Insecurity") FoodInsecurity 
+    and exists  (   (   ["Clinical Activity": "HEDIS; FOOD_INSECURITY_PROCEDURES"]) Numerator
+                        where Numerator.start_date during Interval[FoodInsecurity.start_date, FoodInsecurity.start_date + 30 days])30dFoodInsecurityIntervention
+    ,
+    return
+    ExtendedMeasureResultV2(
+        30dFoodInsecurityIntervention
+        , 'Intervention within 30 days of Food Insecurity Finding' as name
+        , display_date = start_date
+        , calculated_record = false
+        , population = Numerator Performance Met
+        , option_id = performance_met
+    )
+
+define "Numerator Performance Not Met":
+/* Option ID: performance_not_met */
+    not "Denominator Exclusion - Deceased"
+    and not "Denominator Exclusion - LTI and SNP"
+    and not "Denominator Exclusion - Hospice"
+    and not "Numerator Performance Met"
+
+define "Continuous Enrollment - SNS":
+    if start of "Measurement Period" is after "GetMaxCoverageEndDateForPayer"(P)
+    return false,
+    else
+        CEShared."HasContinuousEnrollmentByBenefitTypes"(
+            Interval[start of "Measurement Period", first("GetMaxCoverageEndDateForPayer"(P), end of "Measurement Period")]
+            , {'medical'}
+            , maxAllowedGapDays 45
+            , minConsecutiveGapDays 45
+            , maxAllowedGaps 1
+        )
+        and CEShared."HasEnrollmentOnDateByBenefitTypes"(first("GetMaxCoverageEndDateForPayer"(P), end of "Measurement Period"), {'medical'})
+
+// DEFINITIONS
+define "Screening Period":
+    Interval[start of "Measurement Period", start of "Measurement Period" + 11 months]
+
+define "First Positive Food Insecurity":
+    First(  (   (   (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_AHC_AAFP_FOOD_SCREENINGS"] AHC
+                        where   (   AHC.result_code_type, AHC.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA28397_0_POSITIVE_FINDING_CODE"]
+                                    or AHC.result_code_type, AHC.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA6729_3_POSITIVE_FINDING_CODE"]   )  )
+                    or  (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_PARTIAL_FOOD_INSECURITY_INSTRUMENTS"] Partial
+                            where Partial.result_code_type, Partial.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA33_6_POSITIVE_FINDING_CODE"])
+                    or  (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_PRAPARE_FOOD_SCREENING"] PRAPARE
+                            where PRAPARE.result_code_type, PRAPARE.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA30125_1_POSITIVE_FINDING_CODE"])
+                    or  (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_HUNGER_VITAL_SIGN_SCREENING"] HVS
+                            where HVS.result_code_type, HVS.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA19952_3_POSITIVE_FINDING_CODE"])
+                    or  (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_US_FSS_SCREENING"] FSS
+                            where   (   FSS.result_code_type, FSS.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA30985_8_POSITIVE_FINDING_CODE"]
+                                        or FSS.result_code_type, FSS.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA30986_6_POSITIVE_FINDING_CODE"]   )  )
+                    or  (   ["Clinical Activity": "HEDIS; DIRECT_REFERENCE_WE_CARE_SURVEY_FOOD_SCREENING"] WEcare
+                            where WEcare.result_code_type, WEcare.result_code_value in ["HEDIS; DIRECT_REFERENCE_LA32_8_POSITIVE_FINDING_CODE"])) Insecurity
+                where Insecurity.start_date during "Screening Period" )InsecurityByScreening)
+        

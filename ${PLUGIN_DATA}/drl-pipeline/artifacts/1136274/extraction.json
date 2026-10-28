@@ -1,0 +1,976 @@
+{
+  "ticketId": "1136274",
+  "sourceType": "pr-changed-cql-files",
+  "files": [
+    {
+      "prId": "125070",
+      "repository": "measures",
+      "path": "/measures/2027/HEDIS/SNS1.cql",
+      "sourceCommitId": "8d64bd4132459e059e328bd4740b69bbdd2a6bfa",
+      "definitions": [
+        {
+          "name": "HEDIS Certification Eligible Population",
+          "line": 29
+        },
+        {
+          "name": "Denominator",
+          "line": 33
+        },
+        {
+          "name": "Denominator Exclusion - Deceased",
+          "line": 36
+        },
+        {
+          "name": "Denominator Exclusion - LTI and SNP",
+          "line": 40
+        },
+        {
+          "name": "Denominator Exclusion - Hospice",
+          "line": 56
+        },
+        {
+          "name": "Numerator Performance Met",
+          "line": 70
+        },
+        {
+          "name": "Numerator Performance Not Met",
+          "line": 85
+        },
+        {
+          "name": "Continuous Enrollment - SNS",
+          "line": 92
+        },
+        {
+          "name": "Screening Period",
+          "line": 106
+        },
+        {
+          "name": "Food Insecurity Screening",
+          "line": 109
+        }
+      ],
+      "includes": [
+        {
+          "library": "2027/HEDIS/shared/HospiceDuringPeriod.cql",
+          "version": null,
+          "alias": "Hospice",
+          "line": 11
+        },
+        {
+          "library": "2027/HEDIS/shared/LTIDuringPeriod.cql",
+          "version": null,
+          "alias": "LTI",
+          "line": 12
+        },
+        {
+          "library": "2027/HEDIS/shared/DeceasedDuringPeriod.cql",
+          "version": null,
+          "alias": "DeceasedDuringPeriod",
+          "line": 13
+        },
+        {
+          "library": "2027/HEDIS/shared/ContinuousEnrollmentShared.cql",
+          "version": null,
+          "alias": "CEShared",
+          "line": 14
+        }
+      ],
+      "terminology": [
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_AHC_AAFP_FOOD_SCREENINGS",
+          "identifier": null,
+          "line": 17
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_PARTIAL_FOOD_INSECURITY_INSTRUMENTS",
+          "identifier": null,
+          "line": 18
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_PRAPARE_FOOD_SCREENING",
+          "identifier": null,
+          "line": 19
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_HUNGER_VITAL_SIGN_SCREENING",
+          "identifier": null,
+          "line": 20
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_US_FSS_SCREENING",
+          "identifier": null,
+          "line": 21
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_WE_CARE_SURVEY_FOOD_SCREENING",
+          "identifier": null,
+          "line": 22
+        }
+      ]
+    },
+    {
+      "prId": "125070",
+      "repository": "measures",
+      "path": "/measures/2027/HEDIS/SNS2.cql",
+      "sourceCommitId": "8d64bd4132459e059e328bd4740b69bbdd2a6bfa",
+      "definitions": [
+        {
+          "name": "HEDIS Certification Eligible Population",
+          "line": 42
+        },
+        {
+          "name": "Denominator",
+          "line": 46
+        },
+        {
+          "name": "Denominator Exclusion - Deceased",
+          "line": 61
+        },
+        {
+          "name": "Denominator Exclusion - LTI and SNP",
+          "line": 65
+        },
+        {
+          "name": "Denominator Exclusion - Hospice",
+          "line": 79
+        },
+        {
+          "name": "Numerator Performance Met",
+          "line": 93
+        },
+        {
+          "name": "Numerator Performance Not Met",
+          "line": 109
+        },
+        {
+          "name": "Continuous Enrollment - SNS",
+          "line": 116
+        },
+        {
+          "name": "Screening Period",
+          "line": 130
+        },
+        {
+          "name": "First Positive Food Insecurity",
+          "line": 133
+        }
+      ],
+      "includes": [
+        {
+          "library": "2027/HEDIS/shared/HospiceDuringPeriod.cql",
+          "version": null,
+          "alias": "Hospice",
+          "line": 11
+        },
+        {
+          "library": "2027/HEDIS/shared/LTIDuringPeriod.cql",
+          "version": null,
+          "alias": "LTI",
+          "line": 12
+        },
+        {
+          "library": "2027/HEDIS/shared/DeceasedDuringPeriod.cql",
+          "version": null,
+          "alias": "DeceasedDuringPeriod",
+          "line": 13
+        },
+        {
+          "library": "2027/HEDIS/shared/ContinuousEnrollmentShared.cql",
+          "version": null,
+          "alias": "CEShared",
+          "line": 14
+        }
+      ],
+      "terminology": [
+        {
+          "kind": "valueset",
+          "name": "HEDIS; FOOD_INSECURITY_PROCEDURES",
+          "identifier": "2.16.840.1.113883.3.464.1004.2262",
+          "line": 18
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_AHC_AAFP_FOOD_SCREENINGS",
+          "identifier": null,
+          "line": 21
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_PARTIAL_FOOD_INSECURITY_INSTRUMENTS",
+          "identifier": null,
+          "line": 22
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_PRAPARE_FOOD_SCREENING",
+          "identifier": null,
+          "line": 23
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_HUNGER_VITAL_SIGN_SCREENING",
+          "identifier": null,
+          "line": 24
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_US_FSS_SCREENING",
+          "identifier": null,
+          "line": 25
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_WE_CARE_SURVEY_FOOD_SCREENING",
+          "identifier": null,
+          "line": 26
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA32_8_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 27
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA19952_3_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 28
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA30986_6_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 29
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA30125_1_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 30
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA28397_0_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 31
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA6729_3_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 32
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA33_6_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 33
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA30985_8_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 34
+        }
+      ]
+    },
+    {
+      "prId": "125070",
+      "repository": "measures",
+      "path": "/measures/2027/HEDIS/SNS3.cql",
+      "sourceCommitId": "8d64bd4132459e059e328bd4740b69bbdd2a6bfa",
+      "definitions": [
+        {
+          "name": "HEDIS Certification Eligible Population",
+          "line": 31
+        },
+        {
+          "name": "Denominator",
+          "line": 35
+        },
+        {
+          "name": "Denominator Exclusion - Deceased",
+          "line": 38
+        },
+        {
+          "name": "Denominator Exclusion - LTI and SNP",
+          "line": 42
+        },
+        {
+          "name": "Denominator Exclusion - Hospice",
+          "line": 56
+        },
+        {
+          "name": "Numerator Performance Met",
+          "line": 70
+        },
+        {
+          "name": "Numerator Performance Not Met",
+          "line": 84
+        },
+        {
+          "name": "Continuous Enrollment - SNS",
+          "line": 91
+        },
+        {
+          "name": "Screening Period",
+          "line": 105
+        },
+        {
+          "name": "Housing Insecurity Screening",
+          "line": 108
+        }
+      ],
+      "includes": [
+        {
+          "library": "2027/HEDIS/shared/HospiceDuringPeriod.cql",
+          "version": null,
+          "alias": "Hospice",
+          "line": 11
+        },
+        {
+          "library": "2027/HEDIS/shared/LTIDuringPeriod.cql",
+          "version": null,
+          "alias": "LTI",
+          "line": 12
+        },
+        {
+          "library": "2027/HEDIS/shared/DeceasedDuringPeriod.cql",
+          "version": null,
+          "alias": "DeceasedDuringPeriod",
+          "line": 13
+        },
+        {
+          "library": "2027/HEDIS/shared/ContinuousEnrollmentShared.cql",
+          "version": null,
+          "alias": "CEShared",
+          "line": 14
+        }
+      ],
+      "terminology": [
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_CHILDREN_S_HEALTH_WATCH_HOUSING_STABILITY_VITAL_SIGNS_SCREENING",
+          "identifier": null,
+          "line": 18
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_HOUSING_INADEQUACY_AHC_AND_AAFP_SCREENING",
+          "identifier": null,
+          "line": 19
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_HOUSING_INADEQUACY_NCHC_SCREENING",
+          "identifier": null,
+          "line": 20
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_HOUSING_INSTABILITY_AND_HOMELESSNESS_MULTI_SCREENING_CODE",
+          "identifier": null,
+          "line": 21
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_HOUSING_PARTIAL_INSTABILITY_AND_INSECURITY_SCREENING_TOOLS",
+          "identifier": null,
+          "line": 22
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_OTHER_HOUSING_INADEQUACY_NCHC_SCREENING",
+          "identifier": null,
+          "line": 23
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_PROVIDER_SCREENING_SDOH",
+          "identifier": null,
+          "line": 24
+        }
+      ]
+    },
+    {
+      "prId": "125070",
+      "repository": "measures",
+      "path": "/measures/2027/HEDIS/SNS4.cql",
+      "sourceCommitId": "8d64bd4132459e059e328bd4740b69bbdd2a6bfa",
+      "definitions": [
+        {
+          "name": "HEDIS Certification Eligible Population",
+          "line": 51
+        },
+        {
+          "name": "Denominator",
+          "line": 55
+        },
+        {
+          "name": "Denominator Exclusion - Deceased",
+          "line": 71
+        },
+        {
+          "name": "Denominator Exclusion - LTI and SNP",
+          "line": 75
+        },
+        {
+          "name": "Denominator Exclusion - Hospice",
+          "line": 89
+        },
+        {
+          "name": "Numerator Performance Met",
+          "line": 103
+        },
+        {
+          "name": "Numerator Performance Not Met",
+          "line": 138
+        },
+        {
+          "name": "Continuous Enrollment - SNS",
+          "line": 145
+        },
+        {
+          "name": "Screening Period",
+          "line": 159
+        },
+        {
+          "name": "First Positive Housing Insecurity",
+          "line": 162
+        },
+        {
+          "name": "Housing Instability and Homelessness",
+          "line": 167
+        },
+        {
+          "name": "Housing Inadequacy",
+          "line": 179
+        }
+      ],
+      "includes": [
+        {
+          "library": "2027/HEDIS/shared/HospiceDuringPeriod.cql",
+          "version": null,
+          "alias": "Hospice",
+          "line": 11
+        },
+        {
+          "library": "2027/HEDIS/shared/LTIDuringPeriod.cql",
+          "version": null,
+          "alias": "LTI",
+          "line": 12
+        },
+        {
+          "library": "2027/HEDIS/shared/DeceasedDuringPeriod.cql",
+          "version": null,
+          "alias": "DeceasedDuringPeriod",
+          "line": 13
+        },
+        {
+          "library": "2027/HEDIS/shared/ContinuousEnrollmentShared.cql",
+          "version": null,
+          "alias": "CEShared",
+          "line": 14
+        }
+      ],
+      "terminology": [
+        {
+          "kind": "valueset",
+          "name": "HEDIS; HOMELESSNESS_PROCEDURES",
+          "identifier": "2.16.840.1.113883.3.464.1004.2410",
+          "line": 18
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; HOUSING_INADEQUACY_PROCEDURES",
+          "identifier": "2.16.840.1.113883.3.464.1004.2411",
+          "line": 19
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; HOUSING_INSTABILITY_PROCEDURES",
+          "identifier": "2.16.840.1.113883.3.464.1004.2412",
+          "line": 20
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_CHILDREN_S_HEALTH_WATCH_HOUSING_STABILITY_VITAL_SIGNS_SCREENING",
+          "identifier": null,
+          "line": 23
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_HOUSING_INADEQUACY_AHC_AND_AAFP_SCREENING",
+          "identifier": null,
+          "line": 24
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_HOUSING_INADEQUACY_NCHC_SCREENING",
+          "identifier": null,
+          "line": 25
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_HOUSING_INSTABILITY_AND_HOMELESSNESS_MULTI_SCREENING_CODE",
+          "identifier": null,
+          "line": 26
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_HOUSING_PARTIAL_INSTABILITY_AND_INSECURITY_SCREENING_TOOLS",
+          "identifier": null,
+          "line": 27
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_OTHER_HOUSING_INADEQUACY_NCHC_SCREENING",
+          "identifier": null,
+          "line": 28
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA31994_9_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 29
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA31996_4_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 30
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA32001_2_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 31
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA28580_1_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 32
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA31998_0_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 33
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA30190_5_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 34
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA32000_4_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 35
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA32695_1_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 36
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA31997_2_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 37
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA32693_6_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 38
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA31995_6_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 39
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA31999_8_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 40
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA33_6_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 41
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA32691_0_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 42
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA32694_4_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 43
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA32696_9_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 44
+        }
+      ]
+    },
+    {
+      "prId": "125070",
+      "repository": "measures",
+      "path": "/measures/2027/HEDIS/SNS5.cql",
+      "sourceCommitId": "8d64bd4132459e059e328bd4740b69bbdd2a6bfa",
+      "definitions": [
+        {
+          "name": "HEDIS Certification Eligible Population",
+          "line": 30
+        },
+        {
+          "name": "Denominator",
+          "line": 34
+        },
+        {
+          "name": "Denominator Exclusion - Deceased",
+          "line": 37
+        },
+        {
+          "name": "Denominator Exclusion - LTI and SNP",
+          "line": 41
+        },
+        {
+          "name": "Denominator Exclusion - Hospice",
+          "line": 55
+        },
+        {
+          "name": "Numerator Performance Met",
+          "line": 69
+        },
+        {
+          "name": "Numerator Performance Not Met",
+          "line": 83
+        },
+        {
+          "name": "Continuous Enrollment - SNS",
+          "line": 90
+        },
+        {
+          "name": "Screening Period",
+          "line": 104
+        },
+        {
+          "name": "Transportation Insecurity Screening",
+          "line": 107
+        }
+      ],
+      "includes": [
+        {
+          "library": "2027/HEDIS/shared/HospiceDuringPeriod.cql",
+          "version": null,
+          "alias": "Hospice",
+          "line": 11
+        },
+        {
+          "library": "2027/HEDIS/shared/LTIDuringPeriod.cql",
+          "version": null,
+          "alias": "LTI",
+          "line": 12
+        },
+        {
+          "library": "2027/HEDIS/shared/DeceasedDuringPeriod.cql",
+          "version": null,
+          "alias": "DeceasedDuringPeriod",
+          "line": 13
+        },
+        {
+          "library": "2027/HEDIS/shared/ContinuousEnrollmentShared.cql",
+          "version": null,
+          "alias": "CEShared",
+          "line": 14
+        }
+      ],
+      "terminology": [
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_AAFP_SHORT_FORM",
+          "identifier": null,
+          "line": 18
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_PARTIAL_TRANSPORTATION_SCREENING_TOOLS",
+          "identifier": null,
+          "line": 19
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_CUBS_SCREENING",
+          "identifier": null,
+          "line": 20
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_PROMIS_SCREENING",
+          "identifier": null,
+          "line": 21
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_MULTI_TRANSPORTATION_SCREENING_CODE",
+          "identifier": null,
+          "line": 22
+        }
+      ]
+    },
+    {
+      "prId": "125070",
+      "repository": "measures",
+      "path": "/measures/2027/HEDIS/SNS6.cql",
+      "sourceCommitId": "8d64bd4132459e059e328bd4740b69bbdd2a6bfa",
+      "definitions": [
+        {
+          "name": "HEDIS Certification Eligible Population",
+          "line": 43
+        },
+        {
+          "name": "Denominator",
+          "line": 47
+        },
+        {
+          "name": "Denominator Exclusion - Deceased",
+          "line": 62
+        },
+        {
+          "name": "Denominator Exclusion - LTI and SNP",
+          "line": 66
+        },
+        {
+          "name": "Denominator Exclusion - Hospice",
+          "line": 80
+        },
+        {
+          "name": "Numerator Performance Met",
+          "line": 94
+        },
+        {
+          "name": "Numerator Performance Not Met",
+          "line": 111
+        },
+        {
+          "name": "Continuous Enrollment - SNS",
+          "line": 118
+        },
+        {
+          "name": "Screening Period",
+          "line": 132
+        },
+        {
+          "name": "First Positive Transportation Insecurity",
+          "line": 135
+        }
+      ],
+      "includes": [
+        {
+          "library": "2027/HEDIS/shared/HospiceDuringPeriod.cql",
+          "version": null,
+          "alias": "Hospice",
+          "line": 11
+        },
+        {
+          "library": "2027/HEDIS/shared/LTIDuringPeriod.cql",
+          "version": null,
+          "alias": "LTI",
+          "line": 12
+        },
+        {
+          "library": "2027/HEDIS/shared/DeceasedDuringPeriod.cql",
+          "version": null,
+          "alias": "DeceasedDuringPeriod",
+          "line": 13
+        },
+        {
+          "library": "2027/HEDIS/shared/ContinuousEnrollmentShared.cql",
+          "version": null,
+          "alias": "CEShared",
+          "line": 14
+        }
+      ],
+      "terminology": [
+        {
+          "kind": "valueset",
+          "name": "HEDIS; TRANSPORTATION_INSECURITY_PROCEDURES",
+          "identifier": "2.16.840.1.113883.3.464.1004.2264",
+          "line": 18
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_AAFP_SHORT_FORM",
+          "identifier": null,
+          "line": 21
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_PARTIAL_TRANSPORTATION_SCREENING_TOOLS",
+          "identifier": null,
+          "line": 22
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_CUBS_SCREENING",
+          "identifier": null,
+          "line": 23
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_TRANSPORTATION_PROMIS_SCREENING",
+          "identifier": null,
+          "line": 24
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_MULTI_TRANSPORTATION_SCREENING_CODE",
+          "identifier": null,
+          "line": 25
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA33_6_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 26
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA33093_8_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 27
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA29233_6_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 28
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA30024_6_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 29
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA30134_3_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 30
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA30026_1_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 31
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA29232_8_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 32
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA29234_4_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 33
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA30133_5_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 34
+        },
+        {
+          "kind": "valueset",
+          "name": "HEDIS; DIRECT_REFERENCE_LA30027_9_POSITIVE_FINDING_CODE",
+          "identifier": null,
+          "line": 35
+        }
+      ]
+    }
+  ],
+  "cqlPrDiffs": [
+    {
+      "slug": "sns1",
+      "path": "/measures/2027/HEDIS/SNS1.cql",
+      "patchFile": "artifacts/1136274/patches/sns1-cql-diff.patch",
+      "baseCommit": "f454c37d991d9b06be9599ea26e95c7389f78594",
+      "baseStatus": "added",
+      "addedLines": 119,
+      "removedLines": 0
+    },
+    {
+      "slug": "sns2",
+      "path": "/measures/2027/HEDIS/SNS2.cql",
+      "patchFile": "artifacts/1136274/patches/sns2-cql-diff.patch",
+      "baseCommit": "f454c37d991d9b06be9599ea26e95c7389f78594",
+      "baseStatus": "added",
+      "addedLines": 149,
+      "removedLines": 0
+    },
+    {
+      "slug": "sns3",
+      "path": "/measures/2027/HEDIS/SNS3.cql",
+      "patchFile": "artifacts/1136274/patches/sns3-cql-diff.patch",
+      "baseCommit": "f454c37d991d9b06be9599ea26e95c7389f78594",
+      "baseStatus": "added",
+      "addedLines": 116,
+      "removedLines": 0
+    },
+    {
+      "slug": "sns4",
+      "path": "/measures/2027/HEDIS/SNS4.cql",
+      "patchFile": "artifacts/1136274/patches/sns4-cql-diff.patch",
+      "baseCommit": "f454c37d991d9b06be9599ea26e95c7389f78594",
+      "baseStatus": "added",
+      "addedLines": 204,
+      "removedLines": 0
+    },
+    {
+      "slug": "sns5",
+      "path": "/measures/2027/HEDIS/SNS5.cql",
+      "patchFile": "artifacts/1136274/patches/sns5-cql-diff.patch",
+      "baseCommit": "f454c37d991d9b06be9599ea26e95c7389f78594",
+      "baseStatus": "added",
+      "addedLines": 115,
+      "removedLines": 0
+    },
+    {
+      "slug": "sns6",
+      "path": "/measures/2027/HEDIS/SNS6.cql",
+      "patchFile": "artifacts/1136274/patches/sns6-cql-diff.patch",
+      "baseCommit": "f454c37d991d9b06be9599ea26e95c7389f78594",
+      "baseStatus": "added",
+      "addedLines": 155,
+      "removedLines": 0
+    }
+  ],
+  "assumptions": [
+    "MCP was used for PR metadata resolution and source commit enforcement.",
+    "HTTPS fallback was used only for latest PR iteration changed files and commit-path file content retrieval.",
+    "Extraction is syntax-level and does not infer unstated business logic."
+  ],
+  "status": "extraction-complete"
+}
